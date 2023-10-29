@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
 
 public class ChessBoard   : MonoBehaviour
 {
@@ -26,13 +29,21 @@ public class ChessBoard   : MonoBehaviour
 
     int points;
 
-    void Update()
+    public int randomIndex;
+    public GameObject fullPanel;
+
+    private void Start()
     {
+        blackTilePositionsList = new List<Vector3>();
+        whiteTilePositionsList = new List<Vector3>();
+        possiblePositionsToInstance = new List<Vector3>();
+
+        fullPanel.SetActive(false);
         CreateChessBoard();
         AddingListFunciton();
-        StartCoroutine(InstanceApples()); 
+
+        StartCoroutine(InstanceApples());
     }
-    
 
     private void CreateChessBoard()
     {
@@ -44,7 +55,7 @@ public class ChessBoard   : MonoBehaviour
 
             for (int y = value; y > 0; y--)
             {
-                if (y % 2 == 0) //si és parell,
+                if (y % 2 == 0) //si és parell
                 {
                     blackValue = value;
                     whiteValue = value - 1;
@@ -68,7 +79,7 @@ public class ChessBoard   : MonoBehaviour
                     //save tile position into the list
                     blackTilePositionsList.Add(blackTile.transform.position);
 
-                    Debug.Log(blackTile.transform.position);
+                    //Debug.Log(blackTile.transform.position);
                 }
                 for (int x = whiteValue; x > 0; x -= 2)
                 {
@@ -83,7 +94,7 @@ public class ChessBoard   : MonoBehaviour
                     //save tile position into the list
                     whiteTilePositionsList.Add(whiteTile.transform.position);
 
-                    Debug.Log(whiteTile.transform.position);
+                    //Debug.Log(whiteTile.transform.position)
                 }
                 chessboardIsCreated = true;
             }
@@ -91,16 +102,15 @@ public class ChessBoard   : MonoBehaviour
         }
     }
 
-    private List<Vector3> AddingListFunciton()
+    private void AddingListFunciton()
     {
         possiblePositionsToInstance.AddRange(blackTilePositionsList);
         possiblePositionsToInstance.AddRange(whiteTilePositionsList);
-        return possiblePositionsToInstance;
     }
 
     private IEnumerator InstanceApples()
     {
-        for(int i = possiblePositionsToInstance.Count; i>=0; i--)
+        for(int i = possiblePositionsToInstance.Count; i>0; i--)
         {
             RandomPositionOfTheList();
 
@@ -112,7 +122,7 @@ public class ChessBoard   : MonoBehaviour
             appleSpriteRenderer.sortingOrder = 10;
             appleFruitGO.transform.position = randomPositionFruit;
 
-            if(isOnTheWhiteTileVariable == true)
+            if (isOnTheWhiteTileVariable == true)
             {
                 points++;
             }
@@ -121,30 +131,33 @@ public class ChessBoard   : MonoBehaviour
                 points += 5;
             }
 
-            yield return new WaitForSeconds(20f);
+            Debug.Log(points);
+
+            possiblePositionsToInstance.RemoveAt(randomIndex);
+
+            yield return new WaitForSeconds(1);
         }
+
+        fullPanel.SetActive(true); 
+            //activam es panel de que tot està plè
     }
 
 
     public void RandomPositionOfTheList()
     {
         //choose the random index
-        int randomIndex = Random.Range(0, possiblePositionsToInstance.Count);
+        randomIndex = Random.Range(0, possiblePositionsToInstance.Count);
 
-        Debug.Log(randomIndex);
         //set the apple position to the random pos
         randomPositionFruit = possiblePositionsToInstance[randomIndex];
 
-        //delete the position where the apple has been created off the list --> NO SE SI ME CONVÉ FER-HO AQUÍ PER S'ORDRE
-        possiblePositionsToInstance.RemoveAt(randomIndex);
-
-        isOnTheWhiteTileVariable = IsOnTheWhiteTile(randomIndex);
+        isOnTheWhiteTileVariable = IsOnTheWhiteTile();
     }
 
-    public bool IsOnTheWhiteTile(int index)
+    public bool IsOnTheWhiteTile()
     {
         //si sa posició de sa poma està a sa llista white return true, else, return false
-        if (whiteTilePositionsList[index] != null)
+        if (whiteTilePositionsList.Contains(randomPositionFruit))
         {
             return true;
         }
